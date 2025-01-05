@@ -1,5 +1,6 @@
 import {AUTO, Game} from 'phaser'
 import GameScene from "./scenes/GameScene.js";
+import {MraidManager} from "./managers/mraidManager.js";
 
 const config = {
     type: AUTO,
@@ -14,4 +15,27 @@ const config = {
     }
 }
 
-const game = new Game(config);
+let game;
+
+function startGame() {
+    if (!game) {
+        game = new Phaser.Game(config);
+    } else {
+        // Если уже есть, возможно, надо resume() - зависти от логики
+    }
+}
+
+function destroyGame() {
+    if (game) {
+        game.destroy(true);
+        game = null;
+    }
+}
+
+// Инициализация MRAID
+MraidManager.initialize(startGame, destroyGame);
+
+// Обработчик глобального клика (если нужно)
+document.addEventListener("click", () => {
+    MraidManager.handleClick();
+});
