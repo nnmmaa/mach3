@@ -1,0 +1,14 @@
+{
+  "resources": [
+    "title.ogg",
+    "title.m4a"
+  ],
+  "spritemap": {
+    "title": {
+      "start": 0,
+      "end": 15.867937,
+      "loop": true
+    }
+  },
+  "autoplay": "title"
+}
