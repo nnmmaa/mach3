@@ -1,4 +1,4 @@
-import {AUTO, Game} from 'phaser'
+import {AUTO} from 'phaser'
 import GameScene from "./scenes/GameScene.js";
 import {MraidManager} from "./managers/mraidManager.js";
 
