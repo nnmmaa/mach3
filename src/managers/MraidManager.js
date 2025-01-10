@@ -103,19 +103,17 @@ export class MraidManager {
     /**
      * Обработчик клика
      */
-    static handleClick() {
+    static handleClick(url = "https://example.com/install") {
         if (typeof mraid !== "undefined") {
-            const url = mraid.getParameter?.("clickURL") || "https://yourgame.com";
-            DebugOverlay.log("[MraidManager] Открываем URL: " + url);
             try {
                 mraid.open(url);
+                DebugOverlay.log("[MraidManager] URL открыт через MRAID: " + url);
             } catch (err) {
                 DebugOverlay.log("[MraidManager] Ошибка mraid.open: " + err, true);
             }
         } else {
-            // Если MRAID нет
-            DebugOverlay.log("[MraidManager] Открываем URL через window.open", true);
-            window.open("https://yourgame.com", "_blank");
+            window.open(url, "_blank");
+            DebugOverlay.log("[MraidManager] URL открыт через window.open: " + url);
         }
     }
 }

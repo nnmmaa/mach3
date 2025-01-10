@@ -1,18 +1,19 @@
 export const GAME_CONFIG = {
-    TILE_SIZE: 40,
-    ROWS: 8,
-    COLS: 10,
+    TARGET_SCORE: 100,
+    TILE_SIZE: 80,
+    ROWS: 10,
+    COLS: 8,
     GRID_LINE_COLOR: 0x00ff00,
     GRID_LINE_ALPHA: 0.5,
-    START_Y: 150,
+    START_Y: 200,
 
-    AUDIO: {
-        BACKGROUND_TRACK: 'title',
-        EXPLOSION_SOUND: 'whoosh',
-        REMOVE_SOUND: 'match3',
-        MUSIC_VOLUME: 0.1,
-        Bomb_Explosion: 3,
-        Remove_Diamonds: 0.5,
-        EFFECTS_VOLUME: 0.5,
+    SHOW_CTA: {
+        BUTTON_X: 2,
+        BUTTON_Y: 2.5,
+        WIDTH: 300,
+        HEIGHT: 80,
+        FONT_SIZE: 24,
+
+        TEXT_BTN: "Установить",
     }
 };

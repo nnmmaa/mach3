@@ -6,21 +6,7 @@ import { GAME_CONFIG } from '../config.js';
  * что позволяет визуализировать и взаимодействовать с ней в определенной сцене.
  */
 export default class Grid {
-    /**
-     * Создает новый экземпляр Grid.
-     *
-     * @param {object} scene - Сцена, в которую будет добавлена сетка.
-     * @param {object} options - Конфигурационный объект для сетки.
-     * @param {number} [options.tileSize=32] - Размер каждой ячейки в сетке.
-     * @param {number} [options.rows=8] - Количество строк в сетке.
-     * @param {number} [options.cols=8] - Количество столбцов в сетке.
-     * @param {number} [options.x=0] - Координата x для позиции сетки.
-     * @param {number} [options.y=0] - Координата y для позиции сетки.
-     * @param {number} [options.lineColor=0x000000] - Цвет линий сетки.
-     * @param {number} [options.lineAlpha=0.2] - Прозрачность линий сетки.
-     *
-     * @return {Grid} Новый экземпляр Grid.
-     */
+
     constructor(scene, options) {
         this.scene = scene;
 

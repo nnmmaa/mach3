@@ -28,4 +28,18 @@ export class AudioManager {
             }
         }
     }
+
+    async load(key, oggUrl, m4aUrl) {
+        try {
+            await this.audioLoader.loadAudio(key, oggUrl);
+        } catch (err) {
+            await this.audioLoader.loadAudio(key, m4aUrl);
+        }
+    }
+
+    play(key, options = {}) {
+        const sound = this.scene.sound.add(key, options);
+        sound.play();
+        return sound;
+    }
 }

@@ -1,0 +1,35 @@
+{
+  "frames": {
+    "coin": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 198,
+        "h": 198
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 32,
+        "y": 32,
+        "w": 198,
+        "h": 198
+      },
+      "sourceSize": {
+        "w": 262,
+        "h": 262
+      }
+    }
+  },
+  "meta": {
+    "app": "https://www.imagemagick.org",
+    "version": "1.0",
+    "image": "coin.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 198,
+      "h": 198
+    },
+    "scale": "1"
+  }
+}

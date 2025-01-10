@@ -1,6 +1,6 @@
 import {AUTO} from 'phaser'
 import GameScene from "./scenes/GameScene.js";
-import {MraidManager} from "./managers/mraidManager.js";
+import {MraidManager} from "./managers/MraidManager.js";
 
 const config = {
     type: AUTO,
@@ -34,8 +34,3 @@ function destroyGame() {
 
 // Инициализация MRAID
 MraidManager.initialize(startGame, destroyGame);
-
-// Обработчик глобального клика (если нужно)
-document.addEventListener("click", () => {
-    MraidManager.handleClick();
-});
