@@ -3,9 +3,8 @@ import Diamond from '../objects/Diamond.js';
 import Bomb from '../objects/Bomb.js';
 
 export default class MatchManager {
-    constructor(scene, grid) {
+    constructor(scene) {
         this.scene = scene; // Ссылка на сцену
-        this.grid = grid;   // Массив плиток
         this.matches = [];  // Массив найденных совпадений
     }
 
@@ -34,12 +33,12 @@ export default class MatchManager {
                 let row = isHorizontal ? outer : inner;
                 let col = isHorizontal ? inner : outer;
 
-                let currentTile = this.grid[row][col];
+                let currentTile = this.scene.gridArray[row][col];
                 let nextTile = null;
                 if (inner < innerLimit - 1) {
                     let nextRow = isHorizontal ? row : inner + 1;
                     let nextCol = isHorizontal ? inner + 1 : col;
-                    nextTile = this.grid[nextRow][nextCol];
+                    nextTile = this.scene.gridArray[nextRow][nextCol];
                 }
 
                 if (!currentTile || !currentTile.canMatch) {
@@ -74,7 +73,7 @@ export default class MatchManager {
                         for (let i = 0; i < matchLength; i++) {
                             let matchRow = isHorizontal ? row : matchStartInner + i;
                             let matchCol = isHorizontal ? matchStartInner + i : col;
-                            const matchedTile = this.grid[matchRow][matchCol];
+                            const matchedTile = this.scene.gridArray[matchRow][matchCol];
                             if (matchedTile && matchedTile.canMatch && !this.matches.some(group => group.includes(matchedTile))) {
                                 matchGroup.push(matchedTile);
                             }
@@ -122,7 +121,7 @@ export default class MatchManager {
 
                     // Создаем бомбу
                     const bomb = new Bomb(this.scene, x, y, row, col);
-                    this.grid[row][col] = bomb;
+                    this.scene.gridArray[row][col] = bomb;
 
                     // Удаляем старый кристалл, который уже посчитан в уничтоженные
                     tile.destroy();
@@ -136,9 +135,9 @@ export default class MatchManager {
                     if (tile && tile.canMatch) {
                         const row = tile.gridPosition.row;
                         const col = tile.gridPosition.col;
-                        if (!(this.grid[row][col] instanceof Bomb)) {
+                        if (!(this.scene.gridArray[row][col] instanceof Bomb)) {
                             // Убираем ссылку на кристалл из сетки
-                            this.grid[row][col] = null;
+                            this.scene.gridArray[row][col] = null;
 
                             // Анимация исчезновения кристалла через изменение прозрачности
                             this.scene.tweens.add({
@@ -171,14 +170,14 @@ export default class MatchManager {
         for (let col = 0; col < this.scene.cols; col++) {
             let emptySpots = 0;
             for (let row = this.scene.rows - 1; row >= 0; row--) {
-                const tile = this.grid[row][col];
+                const tile = this.scene.gridArray[row][col];
                 if (tile === null) {
                     emptySpots++;
                 } else if (emptySpots > 0) {
                     if (tile.isMovable) { // Проверяем, может ли объект двигаться
-                        this.grid[row + emptySpots][col] = tile;
+                        this.scene.gridArray[row + emptySpots][col] = tile;
                         tile.gridPosition.row += emptySpots;
-                        this.grid[row][col] = null;
+                        this.scene.gridArray[row][col] = null;
 
                         this.scene.tweens.add({
                             targets: tile,
@@ -196,11 +195,11 @@ export default class MatchManager {
             for (let i = 0; i < emptySpots; i++) {
                 const x = col * this.scene.tileSize + this.scene.gridX + this.scene.tileSize / 2;
                 const y = -(i + 1) * this.scene.tileSize + this.scene.gridY + this.scene.tileSize / 2;
-                const frame = this.scene.getRandomFrame(i, col);
+                const frame = this.scene.boardController.getRandomFrame(i, col);
                 const newRow = emptySpots - i - 1;
 
                 // Проверяем, что ячейка свободна
-                if (!this.grid[newRow][col]) {
+                if (!this.scene.gridArray[newRow][col]) {
                     const diamond = Diamond.createDiamond(
                         this.scene,
                         x,
@@ -210,7 +209,7 @@ export default class MatchManager {
                         col,
                         this.scene.tileSize
                     );
-                    this.grid[newRow][col] = diamond;
+                    this.scene.gridArray[newRow][col] = diamond;
 
                     this.scene.tweens.add({
                         targets: diamond,
@@ -252,7 +251,7 @@ export default class MatchManager {
                 newRow >= 0 && newRow < this.scene.rows &&
                 newCol >= 0 && newCol < this.scene.cols
             ) {
-                const tile = this.grid[newRow][newCol];
+                const tile = this.scene.gridArray[newRow][newCol];
                 if (tile) {
                     if (tile instanceof Bomb && !tile.isExploded) {
                         // Взрываем ещё одну бомбу
@@ -265,7 +264,7 @@ export default class MatchManager {
                         }
 
                         // Удаляем плитку из сетки
-                        this.grid[newRow][newCol] = null;
+                        this.scene.gridArray[newRow][newCol] = null;
 
                         // Вместо мгновенного удаления используем анимацию взрыва
                         this.scene.effectsManager.playBombExplosion(tile);

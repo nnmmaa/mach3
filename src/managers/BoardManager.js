@@ -57,7 +57,7 @@ export default class BoardManager {
                 const startY = this.scene.gridY - (this.scene.tileSize * (this.scene.rows - row));
                 const endY = this.scene.gridY + row * this.scene.tileSize + this.scene.tileSize / 2;
 
-                const frame = this.scene.getRandomFrame(row, col);
+                const frame = this.scene.boardController.getRandomFrame(row, col);
                 const diamond = Diamond.createDiamond(
                     this.scene,
                     x,

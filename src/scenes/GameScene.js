@@ -26,6 +26,7 @@ import MatchManager from "../managers/MatchManager.js";
 import EffectsManager from "../managers/EffectsManager.js";
 import BoardManager from "../managers/BoardManager.js";
 import {MraidManager} from "../managers/MraidManager.js";
+import BoardController from "../controllers/BoardController.js"
 
 /**
  * Класс GameScene отвечает за основную игровую логику сцены.
@@ -38,9 +39,9 @@ export default class GameScene extends Phaser.Scene {
         super('GameScene');
         this.matchManager = null;
         this.audioManager = null;
+        this.boardController = null;
         this.isProcessing = false;
         this.gridArray = [];
-        this.grid = null;
         this.score = 0;
 
         this.targetScore = GAME_CONFIG.TARGET_SCORE;
@@ -85,6 +86,7 @@ export default class GameScene extends Phaser.Scene {
         this.matchManager = new MatchManager(this, this.gridArray, this.audioManager);
         this.effectsManager = new EffectsManager(this);
         this.boardManager = new BoardManager(this);
+        this.boardController = new BoardController(this);
 
         const screenWidth = this.scale.width;
         const screenHeight = this.scale.height;
@@ -116,7 +118,7 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // Создание начального набора тайлов
-        this.createTiles();
+        this.boardController.createInitialTiles();
 
         // Создание анимации взрыва
         this.anims.create({
@@ -149,82 +151,6 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
-    /**
-     * createTiles - Создаёт изначальный набор тайлов на игровом поле.
-     */
-    createTiles() {
-        this.gridArray = [];
-
-
-        for (let row = 0; row < this.rows; row++) {
-            this.gridArray[row] = [];
-
-            for (let col = 0; col < this.cols; col++) {
-                const x = this.gridX + col * this.tileSize + this.tileSize / 2;
-                const y = this.gridY + row * this.tileSize + this.tileSize / 2;
-
-                const frame = this.getRandomFrame(row, col);
-
-                const diamond = Diamond.createDiamond(this, x, y, frame, row, col, this.tileSize);
-                this.gridArray[row][col] = diamond;
-
-            }
-        }
-
-        // Инициализация MatchManager для обработки совпадений
-        this.matchManager = new MatchManager(this, this.gridArray);
-        if (this.matchManager.checkMatches()) {
-            this.matchManager.handleMatches();
-        }
-    }
-
-    /**
-     * checkAndRemoveFrame - Вспомогательный метод для удаления неподходящего кадра из списка
-     * с учётом уже расположенных тайлов, чтобы не образовывать совпадение сразу.
-     * @param {number} row1 - Первая строка
-     * @param {number} col1 - Первый столбец
-     * @param {number} row2 - Вторая строка
-     * @param {number} col2 - Второй столбец
-     * @param {number[]} possibleFrames - Возможные кадры для тайла
-     */
-    checkAndRemoveFrame(row1, col1, row2, col2, possibleFrames) {
-        const tile1 = this.gridArray[row1][col1];
-        const tile2 = this.gridArray[row2][col2];
-
-        if (
-            tile1 &&
-            tile2 &&
-            tile1.canMatch &&
-            tile2.canMatch &&
-            tile1.frame.name === tile2.frame.name
-        ) {
-            const frameToAvoid = tile1.frame.name;
-            const index = possibleFrames.indexOf(parseInt(frameToAvoid));
-            if (index > -1) {
-                possibleFrames.splice(index, 1);
-            }
-        }
-    }
-
-    /**
-     * getRandomFrame - Получает случайный кадр (тип кристалла) для тайла, избегая немедленных совпадений.
-     * @param {number} row - Строка тайла
-     * @param {number} col - Столбец тайла
-     * @returns {number} - Случайный кадр
-     */
-    getRandomFrame(row, col) {
-        const possibleFrames = [0, 1, 2, 3, 4];
-
-        if (col >= 2) {
-            this.checkAndRemoveFrame(row, col - 1, row, col - 2, possibleFrames);
-        }
-
-        if (row >= 2) {
-            this.checkAndRemoveFrame(row - 1, col, row - 2, col, possibleFrames);
-        }
-
-        return Phaser.Utils.Array.GetRandom(possibleFrames);
-    }
 
     /**
      * onDragStart - Обработчик начала перетаскивания тайла.
@@ -344,81 +270,16 @@ export default class GameScene extends Phaser.Scene {
             if (toRow >= 0 && toRow < this.rows && toCol >= 0 && toCol < this.cols) {
                 const targetTile = this.gridArray[toRow][toCol];
                 if (targetTile && targetTile.isMovable) {
-                    this.swapTiles(gameObject, targetTile, true);
+                    this.boardController.swapTiles(gameObject, targetTile, true);
                 } else {
-                    this.resetTilePosition(gameObject);
+                    this.boardController.resetTilePosition(gameObject);
                 }
             } else {
-                this.resetTilePosition(gameObject);
+                this.boardController.resetTilePosition(gameObject);
             }
         } else {
-            this.resetTilePosition(gameObject);
+            this.boardController.resetTilePosition(gameObject);
         }
-    }
-
-    /**
-     * swapTiles - Меняет местами два тайла и проверяет совпадения, если ход был игроком.
-     * @param {Phaser.GameObjects.Sprite} tile1 - Первый тайл
-     * @param {Phaser.GameObjects.Sprite} tile2 - Второй тайл
-     * @param {boolean} isPlayerAction - Флаг, указывающий, был ли ход инициирован игроком
-     */
-    swapTiles(tile1, tile2, isPlayerAction) {
-        this.isProcessing = true;
-
-        if (!tile1.isMovable || !tile2.isMovable) {
-            this.resetTilePosition(tile1);
-            this.isProcessing = false;
-            return;
-        }
-
-        const tempRow = tile1.gridPosition.row;
-        const tempCol = tile1.gridPosition.col;
-
-        this.gridArray[tile1.gridPosition.row][tile1.gridPosition.col] = tile2;
-        this.gridArray[tile2.gridPosition.row][tile2.gridPosition.col] = tile1;
-
-        tile1.gridPosition.row = tile2.gridPosition.row;
-        tile1.gridPosition.col = tile2.gridPosition.col;
-        tile2.gridPosition.row = tempRow;
-        tile2.gridPosition.col = tempCol;
-
-        const tileSize = this.tileSize;
-        const gridX = this.gridX;
-        const gridY = this.gridY;
-
-        this.tweens.add({
-            targets: [tile1, tile2],
-            x: (target) => target.gridPosition.col * tileSize + gridX + tileSize / 2,
-            y: (target) => target.gridPosition.row * tileSize + gridY + tileSize / 2,
-            duration: 200,
-            onComplete: () => {
-                if (isPlayerAction) {
-                    if (tile1 instanceof Bomb) {
-                        tile1.explode();
-                        this.isProcessing = false;
-                    } else if (this.matchManager.checkMatches()) {
-                        this.matchManager.handleMatches();
-                    } else {
-                        this.swapTiles(tile1, tile2, false);
-                    }
-                } else {
-                    this.isProcessing = false;
-                }
-            },
-        });
-    }
-
-    /**
-     * resetTilePosition - Возвращает тайл на исходную позицию, если ход не был успешным.
-     * @param {Phaser.GameObjects.Sprite} tile - Тайл, который нужно вернуть
-     */
-    resetTilePosition(tile) {
-        this.tweens.add({
-            targets: tile,
-            x: tile.gridPosition.col * this.tileSize + this.gridX + this.tileSize / 2,
-            y: tile.gridPosition.row * this.tileSize + this.gridY + this.tileSize / 2,
-            duration: 200,
-        });
     }
 
     /**
