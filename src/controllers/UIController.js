@@ -8,9 +8,11 @@ import { GAME_CONFIG } from "../config.js";
 export default class UIController {
     constructor(scene) {
         this.scene = scene;
-        // Можно хранить ссылки на UI-объекты (buttonBg, buttonText, overlay) здесь
+
         this.overlay = null;
         this.ctaButton = null;
+
+        this.scoreText = null;
     }
 
     /**
@@ -70,5 +72,26 @@ export default class UIController {
         });
 
         this.ctaButton = buttonBg;
+    }
+
+    /**
+     * createScoreText - Создаёт текстовый объект для отображения счёта.
+     */
+    createScoreText() {
+        this.scoreText = this.scene.add.text(
+            10, 10,
+            'Счёт: 0',
+            { fontSize: '20px', fill: '#fff' }
+        );
+    }
+
+    /**
+     * updateScore - Обновляет текстовое поле счёта.
+     * @param {number} newScore - Новое значение счёта.
+     */
+    updateScore(newScore) {
+        if (this.scoreText) {
+            this.scoreText.setText(`Счёт: ${newScore}`);
+        }
     }
 }

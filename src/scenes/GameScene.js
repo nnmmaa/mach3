@@ -100,6 +100,7 @@ export default class GameScene extends Phaser.Scene {
         this.dragController.setupDragEvents();
 
         this.uiController = new UIController(this);
+        this.uiController.createScoreText();
 
         const screenWidth = this.scale.width;
         const screenHeight = this.scale.height;
@@ -133,17 +134,6 @@ export default class GameScene extends Phaser.Scene {
         // Создание начального набора тайлов
         this.boardController.createInitialTiles();
 
-        // // Создание анимации взрыва
-        // this.anims.create({
-        //     key: 'explode',
-        //     frames: this.anims.generateFrameNumbers('explosion', {start: 0, end: 22}),
-        //     frameRate: 60,
-        //     repeat: 0,
-        // });
-
-        // Отображение текущего счёта
-        this.scoreText = this.add.text(10, 10, 'Счёт: 0', {fontSize: '20px', fill: '#fff'});
-
         // Загрузка и подготовка фоновой музыки
         this.audioManager.load('title', titleOGG, titleM4A).then(() => {
             if (process.env.NODE_ENV === 'development') {
@@ -167,7 +157,7 @@ export default class GameScene extends Phaser.Scene {
         });
 
         this.score = 0;
-        this.scoreText.setText('Счет: 0');
+        this.uiController.updateScore(this.score);
 
         this.boardManager.removeAllCrystals(() => {
             this.boardManager.spawnNewCrystals(() => {
