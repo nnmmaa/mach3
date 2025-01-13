@@ -89,6 +89,8 @@ export default class GameScene extends Phaser.Scene {
         // Инициализация менеджеров
         this.matchManager = new MatchManager(this, this.gridArray, this.audioManager);
         this.effectsManager = new EffectsManager(this);
+        this.effectsManager.createAnimations();
+
         this.boardManager = new BoardManager(this);
 
         this.boardController = new BoardController(this);
@@ -131,18 +133,13 @@ export default class GameScene extends Phaser.Scene {
         // Создание начального набора тайлов
         this.boardController.createInitialTiles();
 
-        // Создание анимации взрыва
-        this.anims.create({
-            key: 'explode',
-            frames: this.anims.generateFrameNumbers('explosion', {start: 0, end: 22}),
-            frameRate: 60,
-            repeat: 0,
-        });
-
-        // // Настройка обработчиков перетаскивания тайлов
-        // this.input.on('dragstart', this.onDragStart, this);
-        // this.input.on('drag', this.onDrag, this);
-        // this.input.on('dragend', this.onDragEnd, this);
+        // // Создание анимации взрыва
+        // this.anims.create({
+        //     key: 'explode',
+        //     frames: this.anims.generateFrameNumbers('explosion', {start: 0, end: 22}),
+        //     frameRate: 60,
+        //     repeat: 0,
+        // });
 
         // Отображение текущего счёта
         this.scoreText = this.add.text(10, 10, 'Счёт: 0', {fontSize: '20px', fill: '#fff'});

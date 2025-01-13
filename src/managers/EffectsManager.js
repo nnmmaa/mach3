@@ -1,5 +1,3 @@
-import { GAME_CONFIG } from '../config.js';
-
 /**
  * Класс EffectsManager отвечает за визуальные эффекты в игре, такие как анимация взрыва и частицы.
  */
@@ -15,6 +13,15 @@ export default class EffectsManager {
         this.scene = scene;
     }
 
+    createAnimations() {
+        this.scene.anims.create({
+            key: 'explode',
+            frames: this.scene.anims.generateFrameNumbers('explosion', { start: 0, end: 22 }),
+            frameRate: 60,
+            repeat: 0,
+        })
+    }
+
     /**
      * Воспроизводит анимацию взрыва бомбы и удаляет бомбу после завершения анимации.
      * @param {Bomb} bomb - Объект бомбы, которая взрывается.
@@ -26,7 +33,7 @@ export default class EffectsManager {
         // Создаем спрайт взрыва на позиции бомбы
         const explosionSprite = this.scene.add.sprite(bomb.x, bomb.y, 'explosion');
 
-        // Масштабируем взрыв относительно tileSize (64 или 48 - зависит от исходного кадра)
+        // Масштабируем взрыв относительно tileSize
         const scaleFactor = this.scene.tileSize / 48;
         explosionSprite.setScale(scaleFactor);
 
@@ -70,4 +77,6 @@ export default class EffectsManager {
             emitter.destroy();
         });
     }
+
+
 }
