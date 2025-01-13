@@ -27,6 +27,8 @@ import EffectsManager from "../managers/EffectsManager.js";
 import BoardManager from "../managers/BoardManager.js";
 import {MraidManager} from "../managers/MraidManager.js";
 import BoardController from "../controllers/BoardController.js"
+import DragController from "../controllers/DragController.js";
+import UIController from "../controllers/UIController.js";
 
 /**
  * Класс GameScene отвечает за основную игровую логику сцены.
@@ -40,6 +42,8 @@ export default class GameScene extends Phaser.Scene {
         this.matchManager = null;
         this.audioManager = null;
         this.boardController = null;
+        this.dragController = null;
+        this.uiController = null;
         this.isProcessing = false;
         this.gridArray = [];
         this.score = 0;
@@ -86,7 +90,14 @@ export default class GameScene extends Phaser.Scene {
         this.matchManager = new MatchManager(this, this.gridArray, this.audioManager);
         this.effectsManager = new EffectsManager(this);
         this.boardManager = new BoardManager(this);
+
         this.boardController = new BoardController(this);
+        this.boardController.createInitialTiles();
+
+        this.dragController = new DragController(this, this.boardController);
+        this.dragController.setupDragEvents();
+
+        this.uiController = new UIController(this);
 
         const screenWidth = this.scale.width;
         const screenHeight = this.scale.height;
@@ -128,10 +139,10 @@ export default class GameScene extends Phaser.Scene {
             repeat: 0,
         });
 
-        // Настройка обработчиков перетаскивания тайлов
-        this.input.on('dragstart', this.onDragStart, this);
-        this.input.on('drag', this.onDrag, this);
-        this.input.on('dragend', this.onDragEnd, this);
+        // // Настройка обработчиков перетаскивания тайлов
+        // this.input.on('dragstart', this.onDragStart, this);
+        // this.input.on('drag', this.onDrag, this);
+        // this.input.on('dragend', this.onDragEnd, this);
 
         // Отображение текущего счёта
         this.scoreText = this.add.text(10, 10, 'Счёт: 0', {fontSize: '20px', fill: '#fff'});
@@ -151,218 +162,21 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
-
-    /**
-     * onDragStart - Обработчик начала перетаскивания тайла.
-     * @param {Phaser.Input.Pointer} pointer - Указатель мыши или касания
-     * @param {Phaser.GameObjects.Sprite} gameObject - Перетаскиваемый объект
-     */
-    onDragStart(pointer, gameObject) {
-        if (this.isProcessing) return;
-        if (!gameObject.isMovable || !gameObject.input.enabled) return;
-
-        gameObject.startX = gameObject.x;
-        gameObject.startY = gameObject.y;
-
-        gameObject.setDisplaySize(
-            gameObject.originalWidth * 1.3,
-            gameObject.originalHeight * 1.3
-        );
-    }
-
-    /**
-     * onDrag - Обработчик процесса перетаскивания тайла.
-     * Ограничивает перетаскивание на одну клетку в любом направлении.
-     * @param {Phaser.Input.Pointer} pointer - Указатель мыши или касания
-     * @param {Phaser.GameObjects.Sprite} gameObject - Перетаскиваемый объект
-     * @param {number} dragX - Текущая координата X указателя
-     * @param {number} dragY - Текущая координата Y указателя
-     */
-    onDrag(pointer, gameObject, dragX, dragY) {
-        if (this.isProcessing) return;
-        if (!gameObject.isMovable) return;
-
-        const startX = gameObject.startX;
-        const startY = gameObject.startY;
-        const deltaX = dragX - startX;
-        const deltaY = dragY - startY;
-        const maxDelta = this.tileSize;
-
-        // Ограничиваем перетаскивание только на одну клетку
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            // Горизонтально
-            if (deltaX > 0) {
-                gameObject.x = Math.min(startX + maxDelta, dragX);
-            } else {
-                gameObject.x = Math.max(startX - maxDelta, dragX);
-            }
-            gameObject.y = startY;
-        } else {
-            // Вертикально
-            if (deltaY > 0) {
-                gameObject.y = Math.min(startY + maxDelta, dragY);
-            } else {
-                gameObject.y = Math.max(startY - maxDelta, dragY);
-            }
-            gameObject.x = startX;
-        }
-    }
-
-    /**
-     * onDragEnd - Обработчик окончания перетаскивания тайла.
-     * Определяет направление перемещения и инициирует обмен тайлов при необходимости.
-     * @param {Phaser.Input.Pointer} pointer - Указатель мыши или касания
-     * @param {Phaser.GameObjects.Sprite} gameObject - Перетаскиваемый объект
-     */
-    onDragEnd(pointer, gameObject) {
-        if (this.isProcessing) return;
-
-        if (gameObject instanceof Diamond) {
-            // Возвращаемся к исходным размерам
-            gameObject.setDisplaySize(
-                gameObject.originalWidth,
-                gameObject.originalHeight
-            );
-        }
-
-        const deltaX = gameObject.x - gameObject.startX;
-        const deltaY = gameObject.y - gameObject.startY;
-        let direction = null;
-
-        // Определяем направление сдвига
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            if (deltaX > this.tileSize / 2) {
-                direction = "right";
-            } else if (deltaX < -this.tileSize / 2) {
-                direction = "left";
-            }
-        } else {
-            if (deltaY > this.tileSize / 2) {
-                direction = "down";
-            } else if (deltaY < -this.tileSize / 2) {
-                direction = "up";
-            }
-        }
-
-        if (direction) {
-            const fromRow = gameObject.gridPosition.row;
-            const fromCol = gameObject.gridPosition.col;
-            let toRow = fromRow;
-            let toCol = fromCol;
-
-            // Определение целевых координат для обмена
-            switch (direction) {
-                case "up":
-                    toRow -= 1;
-                    break;
-                case "down":
-                    toRow += 1;
-                    break;
-                case "left":
-                    toCol -= 1;
-                    break;
-                case "right":
-                    toCol += 1;
-                    break;
-            }
-
-            // Проверка границ сетки и наличия целевого тайла
-            if (toRow >= 0 && toRow < this.rows && toCol >= 0 && toCol < this.cols) {
-                const targetTile = this.gridArray[toRow][toCol];
-                if (targetTile && targetTile.isMovable) {
-                    this.boardController.swapTiles(gameObject, targetTile, true);
-                } else {
-                    this.boardController.resetTilePosition(gameObject);
-                }
-            } else {
-                this.boardController.resetTilePosition(gameObject);
-            }
-        } else {
-            this.boardController.resetTilePosition(gameObject);
-        }
-    }
-
-    /**
-     * levelCompleted - Метод вызывается при достижении целевого счета.
-     * Очищает поле, затем спавнит новые кристаллы, затем затемняет экран и показывает CTA.
-     */
     levelCompleted() {
         this.gridArray.forEach(row => {
             row.forEach(tile => {
-                if (tile) {
-                    tile.disableInteractive();
-                }
+                if (tile) tile.disableInteractive();
             });
         });
 
         this.score = 0;
-        this.scoreText.setText('Счет: 0')
+        this.scoreText.setText('Счет: 0');
 
         this.boardManager.removeAllCrystals(() => {
             this.boardManager.spawnNewCrystals(() => {
-                this.createOverlay();
-                this.showCTA();
+                this.uiController.createOverlay();
+                this.uiController.showCTA();
             });
-        });
-    }
-
-    /**
-     * createOverlay - Создает полупрозрачный оверлей поверх игры.
-     */
-    createOverlay() {
-        const overlay = this.add.rectangle(
-            this.sys.game.config.width / 2,
-            this.sys.game.config.height / 2,
-            this.sys.game.config.width,
-            this.sys.game.config.height,
-            0x000000,
-            0.5
-        ).setDepth(10);
-
-        this.overlay = overlay;
-    }
-
-    /**
-     * showCTA - Показывает кнопку призыва к действию для установки игры.
-     * Кнопка открывает ссылку через MRAID или window.open в зависимости от доступности.
-     */
-    showCTA() {
-        const buttonX = this.sys.game.config.width / GAME_CONFIG.SHOW_CTA.BUTTON_X;
-        const buttonY = this.sys.game.config.height / GAME_CONFIG.SHOW_CTA.BUTTON_Y;
-
-        // Создаем фон кнопки
-        const buttonBg = this.add.image(
-            buttonX,
-            buttonY,
-            'yellowButtonSml'
-        ).setOrigin(0.5).setDepth(11);
-
-        buttonBg.setDisplaySize(GAME_CONFIG.SHOW_CTA.WIDTH, GAME_CONFIG.SHOW_CTA.HEIGHT);
-
-        // Добавляем текст кнопки
-        const buttonText = this.add.text(buttonX, buttonY, GAME_CONFIG.SHOW_CTA.TEXT_BTN, {
-            fontSize: GAME_CONFIG.SHOW_CTA.FONT_SIZE,
-            color: '#ffffff',
-            fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(11);
-
-        // Делаем кнопку интерактивной
-        buttonBg.setInteractive();
-
-        buttonBg.on('pointerdown', () => {
-            const url = typeof mraid !== "undefined"
-                ? mraid.getParameter?.("clickURL") || "https://example.com/install"
-                : "https://example.com/install";
-
-            MraidManager.handleClick(url);
-        });
-
-        buttonBg.on('pointerover', () => {
-            buttonBg.setFillStyle(0xcccc00);
-        });
-
-        buttonBg.on('pointerout', () => {
-            buttonBg.setFillStyle(0xffff00);
         });
     }
 
