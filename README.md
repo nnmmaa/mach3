@@ -13,7 +13,7 @@ npm -v
 
 2. Склонируйте репозиторий (при необходимости)
 
-git clone https://github.com/your-repo/match3.git
+git clone https://github.com/nnmmaa/mach3.git
 cd match3
 
 (Если проект уже локально, пропустите этот шаг.)
