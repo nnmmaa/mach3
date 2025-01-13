@@ -82,7 +82,7 @@ export default class UIController {
             10, 10,
             'Счёт: 0',
             { fontSize: '20px', fill: '#fff' }
-        );
+        ).setDepth(999);
     }
 
     /**

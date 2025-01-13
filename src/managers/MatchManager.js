@@ -100,7 +100,7 @@ export default class MatchManager {
             });
 
             this.scene.score += destroyedTilesCount;
-            this.scene.scoreText.setText('Счёт: ' + this.scene.score);
+            this.scene.uiController.updateScore(this.scene.score);
 
             if (this.scene.score >= this.scene.targetScore) {
                 this.scene.levelCompleted();
@@ -260,7 +260,7 @@ export default class MatchManager {
                         // Перед удалением тайла увеличим счет, так как он уничтожается взрывом
                         if (tile.canMatch !== false) {
                             this.scene.score += 1;
-                            this.scene.scoreText.setText('Счёт: ' + this.scene.score);
+                            this.scene.uiController.updateScore(this.scene.score);
                         }
 
                         // Удаляем плитку из сетки

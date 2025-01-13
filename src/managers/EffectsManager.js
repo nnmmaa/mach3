@@ -57,8 +57,9 @@ export default class EffectsManager {
         const startY = this.scene.gridY;
 
         // Конечные координаты (область возле текста счёта)
-        const targetX = this.scene.scoreText.x + this.scene.scoreText.width / 2;
-        const targetY = this.scene.scoreText.y + this.scene.scoreText.height / 2;
+        const scoreText = this.scene.uiController.scoreText;
+        const targetX = scoreText.x + scoreText.width / 2;
+        const targetY = scoreText.y + scoreText.height / 2;
 
         // Создаем эмиттер частиц
         const emitter = this.scene.add.particles(0, 0, 'coin', {
