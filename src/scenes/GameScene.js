@@ -148,7 +148,7 @@ export default class GameScene extends Phaser.Scene {
         // Запуск фоновой музыки при первом клике
         this.input.once('pointerdown', () => {
             this.sound.context.resume().then(() => {
-                this.audioManager.play('title', { loop: true, volume: 0.3 });
+                this.audioManager.play('title', { loop: true, volume: GAME_CONFIG.VOLUME.BACKGROUND_MUSIC });
             });
         });
     }

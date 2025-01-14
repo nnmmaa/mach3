@@ -1,3 +1,5 @@
+import {GAME_CONFIG} from "../config.js";
+
 /**
  * Класс EffectsManager отвечает за визуальные эффекты в игре, такие как анимация взрыва и частицы.
  */
@@ -28,7 +30,7 @@ export default class EffectsManager {
      */
     playBombExplosion(bomb) {
         // Проигрываем звуковой эффект взрыва
-        this.scene.audioManager.play('whoosh', { volume: 0.5 });
+        this.scene.audioManager.play('whoosh', { volume: GAME_CONFIG.VOLUME.SOUND_EXPLOSION });
 
         // Создаем спрайт взрыва на позиции бомбы
         const explosionSprite = this.scene.add.sprite(bomb.x, bomb.y, 'explosion');
@@ -65,12 +67,12 @@ export default class EffectsManager {
         const emitter = this.scene.add.particles(0, 0, 'coin', {
             x: { start: startX, end: targetX, ease: 'Power1' },
             y: { start: startY, end: targetY },
-            lifespan: 400,        // Время жизни частицы (мс)
-            frequency: 200,       // Интервал между спаунами (мс)
-            quantity: 1,          // Количество частиц за интервал
-            emitting: true,       // Включает эмиссию
-            stopAfter: 6,         // Количество частиц, после которых эмиссия останавливается
-            scale: { start: 0.2, end: 0.1 }, // Размер частиц
+            lifespan: 400,
+            frequency: 200,
+            quantity: 1,
+            emitting: true,
+            stopAfter: 6,
+            scale: { start: 0.2, end: 0.1 },
         }).setDepth(1);
 
         // После окончания эмиссии уничтожаем эмиттер

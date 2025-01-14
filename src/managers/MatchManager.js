@@ -1,6 +1,6 @@
-// MatchManager.js
 import Diamond from '../objects/Diamond.js';
 import Bomb from '../objects/Bomb.js';
+import {GAME_CONFIG} from "../config.js";
 
 export default class MatchManager {
     constructor(scene) {
@@ -107,7 +107,7 @@ export default class MatchManager {
                 return;
             }
 
-            this.scene.audioManager.play('match3', {volume: 0.5});
+            this.scene.audioManager.play('match3', {volume: GAME_CONFIG.VOLUME.SOUND_CRYSTAL_REMOVAL});
 
             // Создаем бомбы при совпадении 4 и более кристаллов
             this.matches.forEach(matchGroup => {

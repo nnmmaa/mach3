@@ -15,5 +15,11 @@ export const GAME_CONFIG = {
         FONT_SIZE: 24,
 
         TEXT_BTN: "Установить",
+    },
+
+    VOLUME: {
+        SOUND_CRYSTAL_REMOVAL: 0.5,
+        SOUND_EXPLOSION: 0.5,
+        BACKGROUND_MUSIC: 0.3,
     }
 };
